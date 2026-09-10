@@ -4,16 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Umbrella Template</title>
+  <title>Umbrella Graphic</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="topbar">
-    <img src="umbrella-logo.png" alt="Umbrella Corporation" class="ui-logo">
-    <div class="top-actions">
-      <span class="template-name">UMBRELLA TEMPLATE</span>
-      <button id="resetAll" class="btn ghost" type="button">RESET</button>
-    </div>
+    <div class="brand"><img src="umbrella-logo.png" alt="Umbrella Corporation"><span>Graphic</span></div>
+    <button id="downloadTop" class="btn primary" type="button">DOWNLOAD PNG</button>
   </header>
 
   <main class="workspace">
@@ -21,7 +18,6 @@
       <section class="section">
         <h2>Match image</h2>
         <div id="dropzone" class="dropzone" tabindex="0">
-          <div class="drop-icon">+</div>
           <strong>DROP PHOTO HERE</strong>
           <small>JPG / PNG / WEBP</small>
           <button id="chooseImage" type="button" class="btn secondary">SELECT IMAGE</button>
@@ -31,25 +27,19 @@
       </section>
 
       <section class="section">
-        <h2>Match</h2>
-        <div class="grid two">
-          <label>TEAM 1<input id="team1" type="text" value="Team 1" maxlength="24"></label>
-          <label>TEAM 2<input id="team2" type="text" value="Team 2" maxlength="24"></label>
-          <label>SCORE<input id="score1" type="number" min="0" max="99" value="4"></label>
-          <label>SCORE<input id="score2" type="number" min="0" max="99" value="2"></label>
+        <h2>Match information</h2>
+        <div class="team-grid">
+          <label>TEAM 1<input id="team1" type="text" value="TEAM 1" maxlength="22"></label>
+          <label>TEAM 2<input id="team2" type="text" value="TEAM 2" maxlength="22"></label>
+          <label>SCORE<input id="score1" type="number" min="0" max="99" value="0"></label>
+          <label>SCORE<input id="score2" type="number" min="0" max="99" value="0"></label>
         </div>
       </section>
 
       <section class="section">
-        <h2>Team 1 scorers</h2>
-        <div id="scorers1" class="scorers"></div>
-        <button id="addScorer1" type="button" class="btn secondary full">+ ADD SCORER</button>
-      </section>
-
-      <section class="section">
-        <h2>Team 2 scorers</h2>
-        <div id="scorers2" class="scorers"></div>
-        <button id="addScorer2" type="button" class="btn secondary full">+ ADD SCORER</button>
+        <div class="title-row"><h2>Scorers</h2><span id="scorerCount">3</span></div>
+        <div id="scorers" class="scorers"></div>
+        <button id="addScorer" type="button" class="btn secondary full">+ ADD SCORER</button>
       </section>
 
       <section class="section">
@@ -61,24 +51,20 @@
       </section>
 
       <section class="section">
-        <h2>Info box position</h2>
-        <label>UP / DOWN <output id="panelYValue">0%</output><input id="panelY" type="range" min="-24" max="24" value="0"></label>
-        <button id="resetPanel" type="button" class="btn ghost full">CENTER INFO BOX</button>
+        <h2>Graphic position</h2>
+        <label>INFO BOX UP / DOWN <output id="panelYValue">50%</output><input id="panelY" type="range" min="25" max="75" value="50"></label>
+        <label>LOGO SIZE <output id="logoSizeValue">100%</output><input id="logoSize" type="range" min="55" max="150" value="100"></label>
       </section>
 
       <section class="actions">
-        <button id="download" type="button" class="btn primary">DOWNLOAD PNG</button>
+        <button id="download" type="button" class="btn primary large">DOWNLOAD GRAPHIC</button>
+        <button id="resetAll" type="button" class="btn ghost">RESET ALL</button>
       </section>
     </aside>
 
     <section class="preview-area">
-      <div class="preview-head">
-        <span>LIVE PREVIEW</span>
-        <strong>1080 × 1920</strong>
-      </div>
-      <div class="canvas-shell">
-        <canvas id="preview" width="1080" height="1920" aria-label="Live Umbrella football graphic preview"></canvas>
-      </div>
+      <div class="preview-head"><strong>LIVE PREVIEW</strong><span>1080 × 1920</span></div>
+      <div class="canvas-shell"><canvas id="preview" width="1080" height="1920"></canvas></div>
     </section>
   </main>
 
