@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#050505">
+  <title>Umbrella Match Graphics Terminal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/umbrella-logo.png" alt="Umbrella Corporation">
+      <div>
+        <span class="eyebrow">UMB-SPORTS // MEDIA SYSTEM</span>
+        <h1>MATCH GRAPHICS TERMINAL</h1>
+      </div>
+    </div>
+    <div class="status"><i></i> LOCAL / OFFLINE READY</div>
+  </header>
+
+  <main class="workspace">
+    <aside class="control-panel" aria-label="Graphic controls">
+      <section class="section">
+        <div class="section-title"><span>01</span> MATCH IMAGE</div>
+        <div id="dropzone" class="dropzone" tabindex="0">
+          <div class="drop-icon">＋</div>
+          <strong>DROP MATCH PHOTO</strong>
+          <small>JPG / JPEG / PNG / WEBP</small>
+          <button id="chooseImage" type="button" class="btn secondary">SELECT MATCH IMAGE</button>
+          <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+        </div>
+        <div id="fileName" class="file-name">No image selected</div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><span>02</span> MATCH INFORMATION</div>
+        <div class="grid two">
+          <label>TEAM 1<input id="team1" type="text" value="Umbrella FC" maxlength="28"></label>
+          <label>TEAM 2<input id="team2" type="text" value="RPD FC" maxlength="28"></label>
+          <label>SCORE<input id="score1" type="number" min="0" max="99" value="4"></label>
+          <label>SCORE<input id="score2" type="number" min="0" max="99" value="2"></label>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title row-title"><span>03</span> SCORERS <em id="scorerCount">3</em></div>
+        <div id="scorers" class="scorers"></div>
+        <button id="addScorer" type="button" class="btn secondary full">＋ ADD SCORER</button>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><span>04</span> TEMPLATE</div>
+        <label class="select-wrap">ACTIVE TEMPLATE
+          <select aria-label="Template">
+            <option>Umbrella Template</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><span>05</span> IMAGE POSITION</div>
+        <label>ZOOM <output id="zoomValue">100%</output><input id="zoom" type="range" min="100" max="180" value="100"></label>
+        <label>HORIZONTAL <output id="xValue">50%</output><input id="posX" type="range" min="0" max="100" value="50"></label>
+        <label>VERTICAL <output id="yValue">50%</output><input id="posY" type="range" min="0" max="100" value="50"></label>
+        <button id="resetPosition" type="button" class="btn ghost full">RESET IMAGE POSITION</button>
+      </section>
+
+      <section class="actions">
+        <button id="download" type="button" class="btn primary">DOWNLOAD GRAPHIC</button>
+        <button id="resetAll" type="button" class="btn ghost">RESET ALL</button>
+      </section>
+
+      <p class="privacy">LOCAL PROCESSING ONLY — YOUR PHOTO NEVER LEAVES THIS DEVICE.</p>
+    </aside>
+
+    <section class="preview-area">
+      <div class="preview-head">
+        <div><span class="eyebrow">OUTPUT PREVIEW</span><strong>1920 × 1080 PNG</strong></div>
+        <span class="preview-badge">LIVE</span>
+      </div>
+      <div class="canvas-shell">
+        <canvas id="preview" width="1920" height="1080" aria-label="Live match graphic preview"></canvas>
+      </div>
+      <div class="preview-foot">
+        <span>UMB // INTERNAL MEDIA TERMINAL</span>
+        <span>CLIENT-SIDE RENDER</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
