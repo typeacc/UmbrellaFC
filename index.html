@@ -1,92 +1,82 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#050505">
-  <title>Umbrella Match Graphic</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050505">
+<title>Umbrella Match Graphic</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <img src="umbrella-logo.png" alt="Umbrella Corporation logo">
-      <h1>Umbrella Match Graphic</h1>
-    </div>
-    <button id="downloadTop" class="btn red" type="button">Download PNG</button>
-  </header>
-
-  <main class="workspace">
-    <aside class="controls">
-      <section>
-        <h2>Match image</h2>
-        <div id="dropzone" class="dropzone" tabindex="0">
-          <strong>Drop photo here</strong>
-          <span>JPG, PNG or WEBP</span>
-          <button id="chooseImage" class="btn" type="button">Choose image</button>
-          <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
-        </div>
-        <div id="fileName" class="muted">No image selected</div>
-      </section>
-
-      <section>
-        <h2>Match</h2>
-        <div class="two-col">
-          <label>Team 1<input id="team1" value="Umbrella FC" maxlength="26"></label>
-          <label>Score<input id="score1" type="number" min="0" max="99" value="4"></label>
-          <label>Team 2<input id="team2" value="RPD FC" maxlength="26"></label>
-          <label>Score<input id="score2" type="number" min="0" max="99" value="2"></label>
-        </div>
-      </section>
-
-      <section>
-        <div class="section-heading"><h2>Scorers</h2><button id="addScorer" class="small-btn" type="button">+ Add</button></div>
-        <div id="scorers" class="scorers"></div>
-      </section>
-
-      <section>
-        <h2>Graphic position</h2>
-        <label>Info box vertical position <output id="boxYValue">50%</output>
-          <input id="boxY" type="range" min="28" max="72" value="50">
-        </label>
-        <label>Photo zoom <output id="zoomValue">100%</output>
-          <input id="zoom" type="range" min="100" max="180" value="100">
-        </label>
-        <label>Photo horizontal <output id="xValue">50%</output>
-          <input id="posX" type="range" min="0" max="100" value="50">
-        </label>
-        <label>Photo vertical <output id="yValue">50%</output>
-          <input id="posY" type="range" min="0" max="100" value="50">
-        </label>
-        <button id="resetPosition" class="btn secondary" type="button">Reset image position</button>
-      </section>
-
-      <section>
-        <h2>Logo</h2>
-        <label>Logo size <output id="logoSizeValue">100%</output>
-          <input id="logoSize" type="range" min="45" max="155" value="100">
-        </label>
-      </section>
-
-      <section>
-        <h2>Template</h2>
-        <select aria-label="Template"><option>Umbrella Template</option></select>
-      </section>
-
-      <div class="bottom-actions">
-        <button id="download" class="btn red wide" type="button">Download graphic</button>
-        <button id="resetAll" class="btn secondary wide" type="button">Reset</button>
+<header class="topbar">
+  <div class="brand"><img src="umbrella-logo.png" alt="Umbrella Corporation"><span>Match Graphic</span></div>
+  <button id="downloadTop" class="btn primary" type="button">DOWNLOAD GRAPHIC</button>
+</header>
+<main class="workspace">
+  <aside class="controls">
+    <section class="section">
+      <h2>IMAGE</h2>
+      <div id="dropzone" class="dropzone" tabindex="0">
+        <strong>DROP MATCH PHOTO</strong><small>JPG / PNG / WEBP</small>
+        <button id="chooseImage" type="button" class="btn secondary">SELECT MATCH IMAGE</button>
+        <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
       </div>
-    </aside>
+      <div id="fileName" class="file-name">No image selected</div>
+    </section>
 
-    <section class="preview-wrap">
-      <div class="preview-label"><span>Live preview</span><strong>1080 × 1920</strong></div>
-      <div class="canvas-frame">
-        <canvas id="preview" width="1080" height="1920" aria-label="Live graphic preview"></canvas>
+    <section class="section">
+      <h2>MATCH</h2>
+      <div class="grid two">
+        <label>TEAM 1<input id="team1" type="text" value="Team 1" maxlength="28"></label>
+        <label>TEAM 2<input id="team2" type="text" value="Team 2" maxlength="28"></label>
+        <label>SCORE<input id="score1" type="number" min="0" max="99" value="4"></label>
+        <label>SCORE<input id="score2" type="number" min="0" max="99" value="2"></label>
       </div>
     </section>
-  </main>
 
-  <script src="script.js"></script>
+    <section class="section">
+      <div class="section-head"><h2>TEAM 1 SCORERS</h2><span id="count1">2</span></div>
+      <div id="scorers1" class="scorers"></div>
+      <button id="add1" type="button" class="btn secondary full">+ ADD SCORER</button>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><h2>TEAM 2 SCORERS</h2><span id="count2">1</span></div>
+      <div id="scorers2" class="scorers"></div>
+      <button id="add2" type="button" class="btn secondary full">+ ADD SCORER</button>
+    </section>
+
+    <section class="section">
+      <h2>IMAGE POSITION</h2>
+      <label>ZOOM <output id="zoomValue">100%</output><input id="zoom" type="range" min="100" max="180" value="100"></label>
+      <label>HORIZONTAL <output id="xValue">50%</output><input id="posX" type="range" min="0" max="100" value="50"></label>
+      <label>VERTICAL <output id="yValue">50%</output><input id="posY" type="range" min="0" max="100" value="50"></label>
+      <button id="resetPosition" type="button" class="btn ghost full">RESET IMAGE POSITION</button>
+    </section>
+
+    <section class="section">
+      <h2>INFO BOX POSITION</h2>
+      <label>UP / DOWN <output id="panelValue">0</output><input id="panelY" type="range" min="-350" max="350" value="0"></label>
+      <button id="resetPanel" type="button" class="btn ghost full">RESET BOX POSITION</button>
+    </section>
+
+    <section class="section">
+      <h2>UMBRELLA LOGO SIZE</h2>
+      <label>SIZE <output id="logoValue">100%</output><input id="logoSize" type="range" min="60" max="150" value="100"></label>
+      <button id="resetLogo" type="button" class="btn ghost full">RESET LOGO SIZE</button>
+    </section>
+
+    <section class="actions">
+      <button id="download" type="button" class="btn primary large">DOWNLOAD GRAPHIC</button>
+      <button id="resetAll" type="button" class="btn ghost">RESET ALL</button>
+    </section>
+  </aside>
+
+  <section class="preview-area">
+    <div class="preview-head"><strong>LIVE PREVIEW</strong><span>1080 × 1920</span></div>
+    <div class="canvas-shell"><canvas id="preview" width="1080" height="1920"></canvas></div>
+  </section>
+</main>
+<script src="script.js"></script>
 </body>
 </html>

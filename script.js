@@ -1,284 +1,63 @@
 (() => {
-  "use strict";
-  const $ = id => document.getElementById(id);
-  const canvas = $("preview");
-  const ctx = canvas.getContext("2d");
-  const W = 1080, H = 1920;
-
-  const TEXTURES = {
-    metal: "https://cdn.architextures.org/textures/23/6/stainless-steel-none-g8nd1f.jpg",
-    diamond: "https://img.magnific.com/premium-photo/metal-diamond-plate-surface-seamless-tileable-texture_226262-1043.jpg?semt=ais_hybrid&w=740&q=80"
-  };
-
-  const state = {
-    photo: null,
-    photoURL: null,
-    zoom: 100, x: 50, y: 50,
-    boxY: 50,
-    logoSize: 100,
-    scorers: [
-      { name: "placeholder1", goals: 2, team: 1 },
-      { name: "placeholder2", goals: 1, team: 1 },
-      { name: "placeholder3", goals: 1, team: 2 }
-    ]
-  };
-
-  const logo = new Image();
-  logo.src = "umbrella-logo.png";
-  let metalImage = null, diamondImage = null;
-  let metalReady = false, diamondReady = false;
-
-  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-  function safe(v, fallback = "") { return String(v ?? "").trim() || fallback; }
-  function roundRectPath(c, x, y, w, h, r) {
-    const rr = Math.min(r, w / 2, h / 2);
-    c.beginPath(); c.moveTo(x + rr, y); c.lineTo(x + w - rr, y);
-    c.quadraticCurveTo(x + w, y, x + w, y + rr); c.lineTo(x + w, y + h - rr);
-    c.quadraticCurveTo(x + w, y + h, x + w - rr, y + h); c.lineTo(x + rr, y + h);
-    c.quadraticCurveTo(x, y + h, x, y + h - rr); c.lineTo(x, y + rr);
-    c.quadraticCurveTo(x, y, x + rr, y); c.closePath();
-  }
-
-  function makeMetalFallback() {
-    const c = document.createElement("canvas"); c.width = 700; c.height = 700;
-    const x = c.getContext("2d"); x.fillStyle = "#b9bdbe"; x.fillRect(0, 0, 700, 700);
-    for (let i = 0; i < 700; i += 2) { x.fillStyle = i % 4 ? "rgba(255,255,255,.08)" : "rgba(70,75,77,.035)"; x.fillRect(i, 0, 1, 700); }
-    for (let i = 0; i < 700; i += 24) { x.fillStyle = "rgba(255,255,255,.045)"; x.fillRect(0, i, 700, 2); }
-    return c;
-  }
-  function makeDiamondFallback() {
-    const c = document.createElement("canvas"); c.width = 180; c.height = 180;
-    const x = c.getContext("2d"); x.fillStyle = "#9ea4a7"; x.fillRect(0,0,180,180);
-    for (let y = -180; y < 360; y += 45) for (let xx = -180; xx < 360; xx += 45) {
-      x.beginPath(); x.moveTo(xx+22,y); x.lineTo(xx+44,y+22); x.lineTo(xx+22,y+44); x.lineTo(xx,y+22); x.closePath();
-      x.fillStyle = "#aeb4b7"; x.fill(); x.strokeStyle = "rgba(45,48,49,.42)"; x.lineWidth = 2; x.stroke();
-      x.fillStyle = "rgba(255,255,255,.14)"; x.beginPath(); x.moveTo(xx+22,y); x.lineTo(xx+44,y+22); x.lineTo(xx+22,y+27); x.closePath(); x.fill();
-    }
-    return c;
-  }
-  const metalFallback = makeMetalFallback();
-  const diamondFallback = makeDiamondFallback();
-
-  function loadTexture(url, setter, flagSetter) {
-    const im = new Image(); im.crossOrigin = "anonymous";
-    im.onload = () => { setter(im); flagSetter(true); render(); };
-    im.onerror = () => { flagSetter(false); render(); };
-    im.src = url;
-  }
-  loadTexture(TEXTURES.metal, v => metalImage = v, v => metalReady = v);
-  loadTexture(TEXTURES.diamond, v => diamondImage = v, v => diamondReady = v);
-
-  function getTexture(img, fallback) { return ctx.createPattern(img || fallback, "repeat"); }
-
-  function drawMetalBackground() {
-    ctx.fillStyle = getTexture(metalReady ? metalImage : null, metalFallback); ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = "rgba(255,255,255,.055)"; ctx.fillRect(0,0,W,H);
-  }
-
-  function photoRect() {
-    return { x: 58, y: 250, w: 964, h: 1540 };
-  }
-  function drawPhoto() {
-    const r = photoRect();
-    ctx.save();
-    ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
-    if (!state.photo) {
-      ctx.fillStyle = "#17191a"; ctx.fillRect(r.x,r.y,r.w,r.h);
-      ctx.fillStyle = "#858b8e"; ctx.textAlign = "center"; ctx.font = "700 30px Arial";
-      ctx.fillText("SELECT A MATCH PHOTO", W/2, H/2);
-      ctx.restore(); return;
-    }
-    const iw = state.photo.naturalWidth || state.photo.width, ih = state.photo.naturalHeight || state.photo.height;
-    const scale = Math.max(r.w/iw, r.h/ih) * state.zoom/100;
-    const dw = iw*scale, dh = ih*scale;
-    const x = r.x - (dw-r.w)*(state.x/100), y = r.y - (dh-r.h)*(state.y/100);
-    ctx.drawImage(state.photo, x, y, dw, dh);
-    ctx.restore();
-  }
-
-  function drawDiamondFrame() {
-    const r = photoRect();
-    const outer = 34;
-    const p = getTexture(diamondReady ? diamondImage : null, diamondFallback);
-    ctx.fillStyle = p;
-    ctx.fillRect(r.x-outer, r.y-outer, r.w+outer*2, r.h+outer*2);
-    ctx.fillStyle = "rgba(255,255,255,.04)";
-    ctx.fillRect(r.x-outer, r.y-outer, r.w+outer*2, outer);
-    ctx.fillRect(r.x-outer, r.y+r.h, r.w+outer*2, outer);
-    ctx.fillRect(r.x-outer, r.y, outer, r.h);
-    ctx.fillRect(r.x+r.w, r.y, outer, r.h);
-  }
-
-  function drawLogo() {
-    if (!logo.complete || !logo.naturalWidth) return;
-    const maxW = 310 * state.logoSize/100;
-    const maxH = 180 * state.logoSize/100;
-    const scale = Math.min(maxW/logo.naturalWidth, maxH/logo.naturalHeight);
-    const w = logo.naturalWidth*scale, h = logo.naturalHeight*scale;
-    ctx.drawImage(logo, 55, 45, w, h);
-  }
-
-  function drawHeaderText() {
-    ctx.fillStyle = "#111"; ctx.font = "700 16px Arial"; ctx.textAlign = "left"; ctx.fillText("MATCH", 58, 215);
-    ctx.fillStyle = "#777"; ctx.fillRect(58,225,964,2);
-  }
-
-  function fitText(text, maxWidth, start, weight = 800) {
-    let size = start;
-    while (size > 18) {
-      ctx.font = `${weight} ${size}px Arial`;
-      if (ctx.measureText(text).width <= maxWidth) return size;
-      size -= 2;
-    }
-    return size;
-  }
-
-  function getScorers(team) { return state.scorers.filter(s => s.team === team && safe(s.name)); }
-
-  function drawScorerColumn(items, x, y, w, title, align) {
-    ctx.textAlign = align;
-    ctx.fillStyle = "#fff"; ctx.font = "800 24px Arial"; ctx.fillText(title, x, y);
-    let yy = y + 50;
-    if (!items.length) { ctx.fillStyle = "#aeb4b7"; ctx.font = "500 22px Arial"; ctx.fillText("—", x, yy); return; }
-    const maxRows = 7;
-    const shown = items.slice(0,maxRows);
-    let fs = shown.length > 5 ? 19 : shown.length > 3 ? 21 : 23;
-    ctx.font = `600 ${fs}px Arial`;
-    shown.forEach(s => {
-      ctx.fillStyle = "#f5f5f5"; ctx.fillText(s.name, x, yy);
-      ctx.fillStyle = "#ff0000"; ctx.font = `800 ${fs}px Arial`;
-      const goalText = `×${s.goals}`;
-      const nameWidth = ctx.measureText(s.name).width;
-      const gx = align === "left" ? x + nameWidth + 12 : x - nameWidth - 12;
-      ctx.fillText(goalText, gx, yy);
-      ctx.font = `600 ${fs}px Arial`;
-      yy += Math.max(34, fs + 13);
-    });
-  }
-
-  function drawInfoBox() {
-    const team1 = safe($("team1").value, "Team 1");
-    const team2 = safe($("team2").value, "Team 2");
-    const score1 = clamp(parseInt($("score1").value || 0,10),0,99);
-    const score2 = clamp(parseInt($("score2").value || 0,10),0,99);
-    const y = H * (state.boxY/100);
-    const w = 910, h = 475, x = (W-w)/2, top = y-h/2;
-
-    ctx.save();
-    roundRectPath(ctx,x,top,w,h,26); ctx.fillStyle="rgba(5,5,5,.72)"; ctx.fill();
-    ctx.strokeStyle="rgba(245,245,245,.78)"; ctx.lineWidth=2; ctx.stroke();
-    ctx.fillStyle="#ff0000"; ctx.fillRect(x+34,top+32,110,4);
-
-    const leftX=x+95, rightX=x+w-95, centerX=W/2;
-    const teamFs1=fitText(team1,300,35), teamFs2=fitText(team2,300,35);
-    ctx.fillStyle="#f5f5f5"; ctx.textAlign="left"; ctx.font=`800 ${teamFs1}px Arial`; ctx.fillText(team1,leftX,top+92);
-    ctx.textAlign="right"; ctx.font=`800 ${teamFs2}px Arial`; ctx.fillText(team2,rightX,top+92);
-
-    // Compact score: deliberately smaller than the team names' visual footprint.
-    ctx.textAlign="center"; ctx.fillStyle="#fff"; ctx.font="800 58px Arial"; ctx.fillText(`${score1}  —  ${score2}`,centerX,top+92);
-    ctx.fillStyle="rgba(245,245,245,.28)"; ctx.fillRect(x+44,top+125,w-88,1);
-
-    drawScorerColumn(getScorers(1), leftX, top+180, 340, "GOALS", "left");
-    drawScorerColumn(getScorers(2), rightX, top+180, 340, "GOALS", "right");
-
-    ctx.restore();
-  }
-
-  function render() {
-    // Always paint the whole canvas first so a failed texture/photo can never leave a black screen.
-    ctx.clearRect(0,0,W,H);
-    drawMetalBackground();
-    drawLogo();
-    drawHeaderText();
-    drawDiamondFrame();
-    drawPhoto();
-    drawInfoBox();
-  }
-
-  function addScorer(data = {name:"placeholder1",goals:1,team:1}) {
-    state.scorers.push({name:data.name, goals:data.goals, team:data.team});
-    renderScorerInputs(); render();
-  }
-  function renderScorerInputs() {
-    const wrap=$("scorers"); wrap.innerHTML="";
-    state.scorers.forEach((s,i)=>{
-      const row=document.createElement("div"); row.className="scorer-row";
-      const name=document.createElement("input"); name.type="text"; name.maxLength=24; name.value=s.name; name.placeholder="placeholder1";
-      const goals=document.createElement("input"); goals.type="number"; goals.min=1; goals.max=99; goals.value=s.goals;
-      const remove=document.createElement("button"); remove.type="button"; remove.className="remove"; remove.textContent="×"; remove.title="Remove";
-      const team=document.createElement("select"); team.setAttribute("aria-label","Scorer team");
-      team.innerHTML=`<option value="1">Team 1</option><option value="2">Team 2</option>`; team.value=String(s.team);
-      row.style.gridTemplateColumns="minmax(0,1fr) 58px 78px 30px";
-      row.append(name,goals,team,remove); wrap.appendChild(row);
-      name.addEventListener("input",()=>{s.name=name.value;render();});
-      goals.addEventListener("input",()=>{s.goals=clamp(parseInt(goals.value||1,10),1,99);render();});
-      team.addEventListener("change",()=>{s.team=Number(team.value);render();});
-      remove.addEventListener("click",()=>{state.scorers.splice(i,1);renderScorerInputs();render();});
-    });
-  }
-
-  function setFile(file) {
-    if (!file || !/^image\/(jpeg|png|webp)$/.test(file.type)) return;
-    if (state.photoURL) URL.revokeObjectURL(state.photoURL);
-    state.photoURL=URL.createObjectURL(file);
-    const im=new Image();
-    im.onload=()=>{state.photo=im;$("fileName").textContent=file.name;render();};
-    im.onerror=()=>{state.photo=null;$("fileName").textContent="Could not read that image";render();};
-    im.src=state.photoURL;
-  }
-
-  $("chooseImage").addEventListener("click",()=>$("imageInput").click());
-  $("imageInput").addEventListener("change",e=>setFile(e.target.files[0]));
-  const dz=$("dropzone");
-  ["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add("drag");}));
-  ["dragleave","drop"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove("drag");}));
-  dz.addEventListener("drop",e=>setFile(e.dataTransfer.files[0]));
-  dz.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){$("imageInput").click();}});
-
-  ["team1","team2","score1","score2"].forEach(id=>$(id).addEventListener("input",render));
-  $("addScorer").addEventListener("click",()=>addScorer({name:`placeholder${state.scorers.length+1}`,goals:1,team:1}));
-
-  function bindRange(id, valueId, key, format=v=>`${v}%`) {
-    $(id).addEventListener("input",()=>{state[key]=Number($(id).value);$(valueId).textContent=format(state[key]);render();});
-  }
-  bindRange("boxY","boxYValue","boxY");
-  bindRange("zoom","zoomValue","zoom");
-  bindRange("posX","xValue","x");
-  bindRange("posY","yValue","y");
-  bindRange("logoSize","logoSizeValue","logoSize");
-  $("resetPosition").addEventListener("click",()=>{
-    state.zoom=100;state.x=50;state.y=50;
-    $("zoom").value=100;$("posX").value=50;$("posY").value=50;
-    $("zoomValue").textContent="100%";$("xValue").textContent="50%";$("yValue").textContent="50%";render();
-  });
-
-  function resetAll(){
-    $("team1").value="Umbrella FC";$("team2").value="RPD FC";$("score1").value=4;$("score2").value=2;
-    state.scorers=[{name:"placeholder1",goals:2,team:1},{name:"placeholder2",goals:1,team:1},{name:"placeholder3",goals:1,team:2}];
-    state.boxY=50;state.zoom=100;state.x=50;state.y=50;state.logoSize=100;
-    ["boxY","zoom","posX","posY","logoSize"].forEach(id=>$(id).value=id==="boxY"?50:100);
-    $("posX").value=50;$("posY").value=50;
-    $("boxYValue").textContent="50%";$("zoomValue").textContent="100%";$("xValue").textContent="50%";$("yValue").textContent="50%";$("logoSizeValue").textContent="100%";
-    renderScorerInputs();render();
-  }
-  $("resetAll").addEventListener("click",resetAll);
-
-  async function exportPNG(){
-    render();
-    try {
-      const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Export failed")),"image/png",1));
-      const url=URL.createObjectURL(blob), a=document.createElement("a"); a.href=url;a.download="umbrella-match-graphic.png";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-    } catch(e) {
-      // If a third-party texture blocks canvas export, repaint using only local fallbacks and export safely.
-      metalReady=false;diamondReady=false;render();
-      const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png",1));
-      if(blob){const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="umbrella-match-graphic.png";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-      else alert("The graphic could not be exported. Please try again.");
-    }
-  }
-  $("download").addEventListener("click",exportPNG);$("downloadTop").addEventListener("click",exportPNG);
-
-  logo.onload=render;
-  renderScorerInputs();
-  render();
+const $=id=>document.getElementById(id), canvas=$("preview"), ctx=canvas.getContext("2d");
+const W=1080,H=1920;
+let photo=null, photoURL=null;
+const logo=new Image(); logo.src="umbrella-logo.png";
+const metal=new Image(); metal.src="stainless-steel.jpg";
+const diamond=new Image(); diamond.src="diamond-plate.jpg";
+const state={zoom:100,x:50,y:50,panelY:0,logoSize:100};
+const defaults1=[["Placeholder 1",2],["Placeholder 2",1]], defaults2=[["Placeholder 3",1]];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const text=v=>String(v??"").trim();
+function roundRect(x,y,w,h,r){const p=new Path2D();p.moveTo(x+r,y);p.lineTo(x+w-r,y);p.quadraticCurveTo(x+w,y,x+w,y+r);p.lineTo(x+w,y+h-r);p.quadraticCurveTo(x+w,y+h,x+w-r,y+h);p.lineTo(x+r,y+h);p.quadraticCurveTo(x,y+h,x,y+h-r);p.lineTo(x,y+r);p.quadraticCurveTo(x,y,x+r,y);p.closePath();return p}
+function fit(t,max,min,width,weight="800"){let s=max;ctx.font=`${weight} ${s}px Arial`;while(s>min&&ctx.measureText(t).width>width){s--;ctx.font=`${weight} ${s}px Arial`}return s}
+function pattern(img,fallback){return img.complete&&img.naturalWidth?ctx.createPattern(img,"repeat"):fallback}
+function fallbackMetal(){const c=document.createLinearGradient(0,0,0,H);c.addColorStop(0,"#c8cccd");c.addColorStop(.5,"#aeb4b6");c.addColorStop(1,"#c1c5c6");return c}
+function fallbackDiamond(){return "#aeb4b7"}
+function templatePath(){const p=new Path2D();p.moveTo(52,270);p.lineTo(820,270);p.lineTo(935,195);p.lineTo(1028,195);p.lineTo(1028,1865);p.lineTo(52,1865);p.closePath();return p}
+function photoArea(){return {x:52,y:195,w:976,h:1670}}
+function drawPhoto(){if(!photo)return;const a=photoArea();ctx.save();ctx.clip(templatePath());const iw=photo.naturalWidth,ih=photo.naturalHeight;const scale=Math.max(a.w/iw,a.h/ih)*(state.zoom/100);const dw=iw*scale,dh=ih*scale;const x=a.x-(dw-a.w)*(state.x/100);const y=a.y-(dh-a.h)*(state.y/100);ctx.drawImage(photo,x,y,dw,dh);ctx.restore()}
+function addRow(container,name="",goals=1){const row=document.createElement("div");row.className="scorer-row";row.innerHTML='<input class="scorer-name" type="text" maxlength="24" placeholder="Player name"><input class="scorer-goals" type="number" min="1" max="99"><button class="remove" type="button" aria-label="Remove scorer">×</button>';row.querySelector('.scorer-name').value=name;row.querySelector('.scorer-goals').value=goals;row.querySelector('.remove').onclick=()=>{row.remove();update()};row.querySelectorAll('input').forEach(i=>i.addEventListener('input',update));$(container).appendChild(row);updateCounts()}
+function rows(container){return [...$(container).querySelectorAll('.scorer-row')].map(r=>({name:text(r.querySelector('.scorer-name').value),goals:clamp(parseInt(r.querySelector('.scorer-goals').value||1,10),1,99)})).filter(s=>s.name)}
+function updateCounts(){$('count1').textContent=$("scorers1").children.length;$('count2').textContent=$("scorers2").children.length}
+function drawHeader(){const size=300*(state.logoSize/100),x=48,y=35;ctx.drawImage(logo,x,y,size,size*(logo.naturalHeight/logo.naturalWidth));}
+function drawInfoPanel(){
+ const pw=940,ph=610,px=70,py=1030+state.panelY;
+ const p=roundRect(px,py,pw,ph,30);
+ ctx.save();ctx.fillStyle="rgba(5,6,7,.70)";ctx.fill(p);ctx.strokeStyle="rgba(225,229,230,.75)";ctx.lineWidth=3;ctx.stroke(p);ctx.restore();
+ const t1=text($("team1").value)||"Team 1",t2=text($("team2").value)||"Team 2";
+ const s1=String(clamp(parseInt($("score1").value||0,10),0,99)),s2=String(clamp(parseInt($("score2").value||0,10),0,99));
+ const leftX=285,rightX=825,centerX=555;
+ ctx.textBaseline="middle";ctx.textAlign="center";ctx.fillStyle="#f5f5f5";
+ let fs=fit(t1,52,22,350);ctx.font=`800 ${fs}px Arial`;ctx.fillText(t1,leftX,py+86);
+ fs=fit(t2,52,22,350);ctx.font=`800 ${fs}px Arial`;ctx.fillText(t2,rightX,py+86);
+ ctx.fillStyle="#fff";ctx.font="900 68px Arial";ctx.fillText(`${s1} - ${s2}`,centerX,py+88);
+ ctx.fillStyle="#e00000";ctx.fillRect(centerX-32,py+135,64,4);
+ const a=rows("scorers1"),b=rows("scorers2");
+ ctx.font="800 17px Arial";ctx.fillStyle="#e00000";ctx.textAlign="left";ctx.fillText("GOALS",px+42,py+178);ctx.textAlign="right";ctx.fillText("GOALS",px+pw-42,py+178);
+ const maxRows=5, usable=ph-205, rowH=Math.min(55,usable/maxRows); const start=py+225;
+ function col(list,side){const baseX=side==='left'?px+42:px+pw-42;ctx.textAlign=side==='left'?'left':'right';if(!list.length){ctx.fillStyle="#aeb3b5";ctx.font="600 17px Arial";ctx.fillText("—",baseX,start);return}list.slice(0,maxRows).forEach((s,i)=>{const yy=start+i*rowH;const maxW=330;const f=fit(s.name,23,13,maxW,"700");ctx.font=`700 ${f}px Arial`;ctx.fillStyle="#f2f3f3";ctx.fillText(s.name,baseX,yy);ctx.font="900 20px Arial";ctx.fillStyle="#fff";if(side==='left'){ctx.textAlign='right';ctx.fillText(`×${s.goals}`,px+pw/2-34,yy);ctx.textAlign='left'}else{ctx.textAlign='left';ctx.fillText(`×${s.goals}`,px+pw/2+34,yy);ctx.textAlign='right'}ctx.strokeStyle="rgba(255,255,255,.13)";ctx.lineWidth=1;ctx.beginPath();if(side==='left'){ctx.moveTo(px+42,yy+20);ctx.lineTo(px+pw/2-55,yy+20)}else{ctx.moveTo(px+pw/2+55,yy+20);ctx.lineTo(px+pw-42,yy+20)}ctx.stroke()})}
+ col(a,'left');col(b,'right');
+}
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ // Never leave a black canvas while assets are loading.
+ ctx.fillStyle="#b9bec0";ctx.fillRect(0,0,W,H);
+ ctx.fillStyle=pattern(metal,fallbackMetal());ctx.fillRect(0,0,W,H);
+ const p=templatePath();ctx.save();ctx.fillStyle=pattern(diamond,fallbackDiamond());ctx.fill(p);ctx.restore();
+ drawPhoto();
+ if(!photo){ctx.save();ctx.clip(p);ctx.fillStyle="rgba(20,22,23,.25)";ctx.fillRect(0,0,W,H);ctx.fillStyle="rgba(255,255,255,.55)";ctx.font="700 24px Arial";ctx.textAlign="center";ctx.fillText("SELECT A MATCH PHOTO",540,1030);ctx.restore()}
+ drawHeader();
+ drawInfoPanel();
+}
+function update(){state.zoom=+$('zoom').value;state.x=+$('posX').value;state.y=+$('posY').value;state.panelY=+$('panelY').value;state.logoSize=+$('logoSize').value;$('zoomValue').textContent=state.zoom+'%';$('xValue').textContent=state.x+'%';$('yValue').textContent=state.y+'%';$('panelValue').textContent=(state.panelY>0?'+':'')+state.panelY;$('logoValue').textContent=state.logoSize+'%';updateCounts();draw()}
+function loadFile(file){if(!file)return;if(!/^image\/(jpeg|png|webp)$/.test(file.type)){alert('Please choose a JPG, PNG, or WEBP image.');return}if(photoURL)URL.revokeObjectURL(photoURL);photoURL=URL.createObjectURL(file);const im=new Image();im.onload=()=>{photo=im;$('fileName').textContent=file.name;$('zoom').value=100;$('posX').value=50;$('posY').value=50;update()};im.onerror=()=>{photo=null;draw();alert('That image could not be loaded.')};im.src=photoURL}
+$('chooseImage').onclick=e=>{$('imageInput').click();e.stopPropagation()};$('dropzone').onclick=e=>{if(e.target!==$('chooseImage'))$('imageInput').click()};$('dropzone').onkeydown=e=>{if(e.key==='Enter'||e.key===' ')$('imageInput').click()};$('imageInput').onchange=e=>loadFile(e.target.files[0]);['dragenter','dragover'].forEach(ev=>$('dropzone').addEventListener(ev,e=>{e.preventDefault();$('dropzone').classList.add('drag')}));['dragleave','drop'].forEach(ev=>$('dropzone').addEventListener(ev,e=>{e.preventDefault();$('dropzone').classList.remove('drag')}));$('dropzone').addEventListener('drop',e=>loadFile(e.dataTransfer.files[0]));
+['team1','team2','score1','score2','zoom','posX','posY','panelY','logoSize'].forEach(id=>$(id).addEventListener('input',update));
+$('add1').onclick=()=>addRow('scorers1','',1);$('add2').onclick=()=>addRow('scorers2','',1);
+$('resetPosition').onclick=()=>{$('zoom').value=100;$('posX').value=50;$('posY').value=50;update()};$('resetPanel').onclick=()=>{$('panelY').value=0;update()};$('resetLogo').onclick=()=>{$('logoSize').value=100;update()};
+function download(){draw();canvas.toBlob(blob=>{if(!blob)return;const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Umbrella-Match-Graphic.png';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)},'image/png')}
+$('download').onclick=download;$('downloadTop').onclick=download;
+$('resetAll').onclick=()=>{if(photoURL)URL.revokeObjectURL(photoURL);photo=null;photoURL=null;$('imageInput').value='';$('fileName').textContent='No image selected';$('team1').value='Team 1';$('team2').value='Team 2';$('score1').value=4;$('score2').value=2;$('scorers1').innerHTML='';$('scorers2').innerHTML='';defaults1.forEach(s=>addRow('scorers1',s[0],s[1]));defaults2.forEach(s=>addRow('scorers2',s[0],s[1]));$('zoom').value=100;$('posX').value=50;$('posY').value=50;$('panelY').value=0;$('logoSize').value=100;update()};
+[logo,metal,diamond].forEach(im=>im.onload=draw);defaults1.forEach(s=>addRow('scorers1',s[0],s[1]));defaults2.forEach(s=>addRow('scorers2',s[0],s[1]));update();
 })();
