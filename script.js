@@ -5,7 +5,7 @@
   let photo = null;
   let photoURL = null;
   let logo = new Image();
-  logo.src = "assets/umbrella-logo.png";
+  logo.src = "umbrella-logo.png";
 
   const state = { zoom:100, x:50, y:50 };
   const defaultScorers = [
