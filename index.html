@@ -4,84 +4,81 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Umbrella Match Graphic</title>
+  <title>Umbrella Template</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><img src="umbrella-logo.png" alt="Umbrella Corporation"></div>
-    <div class="status"><i></i> READY</div>
+    <img src="umbrella-logo.png" alt="Umbrella Corporation" class="ui-logo">
+    <div class="top-actions">
+      <span class="template-name">UMBRELLA TEMPLATE</span>
+      <button id="resetAll" class="btn ghost" type="button">RESET</button>
+    </div>
   </header>
 
   <main class="workspace">
     <aside class="control-panel" aria-label="Graphic controls">
       <section class="section">
-        <div class="section-title">MATCH IMAGE</div>
+        <h2>Match image</h2>
         <div id="dropzone" class="dropzone" tabindex="0">
-          <div class="drop-icon">＋</div>
-          <strong>DROP MATCH PHOTO</strong>
-          <small>JPG / JPEG / PNG / WEBP</small>
-          <button id="chooseImage" type="button" class="btn secondary">SELECT MATCH IMAGE</button>
+          <div class="drop-icon">+</div>
+          <strong>DROP PHOTO HERE</strong>
+          <small>JPG / PNG / WEBP</small>
+          <button id="chooseImage" type="button" class="btn secondary">SELECT IMAGE</button>
           <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
         </div>
         <div id="fileName" class="file-name">No image selected</div>
       </section>
 
       <section class="section">
-        <div class="section-title">MATCH INFORMATION</div>
+        <h2>Match</h2>
         <div class="grid two">
-          <label>TEAM 1<input id="team1" type="text" value="Umbrella FC" maxlength="28"></label>
-          <label>TEAM 2<input id="team2" type="text" value="RPD FC" maxlength="28"></label>
+          <label>TEAM 1<input id="team1" type="text" value="Team 1" maxlength="24"></label>
+          <label>TEAM 2<input id="team2" type="text" value="Team 2" maxlength="24"></label>
           <label>SCORE<input id="score1" type="number" min="0" max="99" value="4"></label>
           <label>SCORE<input id="score2" type="number" min="0" max="99" value="2"></label>
         </div>
       </section>
 
       <section class="section">
-        <div class="section-title">TEAM 1 SCORERS <em id="scorerCount1">3</em></div>
+        <h2>Team 1 scorers</h2>
         <div id="scorers1" class="scorers"></div>
-        <button id="addScorer1" type="button" class="btn secondary full">＋ ADD SCORER</button>
+        <button id="addScorer1" type="button" class="btn secondary full">+ ADD SCORER</button>
       </section>
 
       <section class="section">
-        <div class="section-title">TEAM 2 SCORERS <em id="scorerCount2">2</em></div>
+        <h2>Team 2 scorers</h2>
         <div id="scorers2" class="scorers"></div>
-        <button id="addScorer2" type="button" class="btn secondary full">＋ ADD SCORER</button>
+        <button id="addScorer2" type="button" class="btn secondary full">+ ADD SCORER</button>
       </section>
 
       <section class="section">
-        <div class="section-title">TEMPLATE</div>
-        <label class="select-wrap">ACTIVE TEMPLATE
-          <select aria-label="Template"><option>Umbrella Template</option></select>
-        </label>
-      </section>
-
-      <section class="section">
-        <div class="section-title">IMAGE POSITION</div>
+        <h2>Image position</h2>
         <label>ZOOM <output id="zoomValue">100%</output><input id="zoom" type="range" min="100" max="180" value="100"></label>
         <label>HORIZONTAL <output id="xValue">50%</output><input id="posX" type="range" min="0" max="100" value="50"></label>
         <label>VERTICAL <output id="yValue">50%</output><input id="posY" type="range" min="0" max="100" value="50"></label>
-        <button id="resetPosition" type="button" class="btn ghost full">RESET IMAGE POSITION</button>
+        <button id="resetPosition" type="button" class="btn ghost full">RESET IMAGE</button>
       </section>
 
       <section class="section">
-        <div class="section-title">INFO BOX POSITION</div>
-        <label>UP / DOWN <output id="panelYValue">68%</output><input id="panelY" type="range" min="38" max="90" value="68"></label>
-        <button id="resetPanelPosition" type="button" class="btn ghost full">RESET BOX POSITION</button>
+        <h2>Info box position</h2>
+        <label>UP / DOWN <output id="panelYValue">0%</output><input id="panelY" type="range" min="-24" max="24" value="0"></label>
+        <button id="resetPanel" type="button" class="btn ghost full">CENTER INFO BOX</button>
       </section>
 
       <section class="actions">
-        <button id="download" type="button" class="btn primary">DOWNLOAD GRAPHIC</button>
-        <button id="resetAll" type="button" class="btn ghost">RESET ALL</button>
+        <button id="download" type="button" class="btn primary">DOWNLOAD PNG</button>
       </section>
     </aside>
 
     <section class="preview-area">
       <div class="preview-head">
-        <div><span class="eyebrow">PREVIEW</span><strong>1080 × 1920 PNG</strong></div>
-        <span class="preview-badge">LIVE</span>
+        <span>LIVE PREVIEW</span>
+        <strong>1080 × 1920</strong>
       </div>
-      <div class="canvas-shell"><canvas id="preview" width="1080" height="1920" aria-label="Live match graphic preview"></canvas></div>
+      <div class="canvas-shell">
+        <canvas id="preview" width="1080" height="1920" aria-label="Live Umbrella football graphic preview"></canvas>
+      </div>
     </section>
   </main>
 

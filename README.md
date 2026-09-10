@@ -1,12 +1,15 @@
-# Umbrella Match Graphic
+# Umbrella Template
 
-A client-side vertical football match graphic generator.
+A standalone client-side football match graphic generator for GitHub Pages.
 
-- 1080 × 1920 PNG export
-- Local image upload and positioning
-- Separate scorer lists for both teams
-- Movable score/scorer information box
-- Umbrella Corporation visual styling
-- No backend or build process
+## Files
+- `index.html`
+- `style.css`
+- `script.js`
+- `umbrella-logo.png`
 
-Open `index.html` directly or host the files with GitHub Pages.
+No Node.js, npm, backend, database, API key, or build step is required.
+
+The generated graphic is 1080 × 1920 PNG.
+
+The template uses locally generated metal/diamond-plate textures so the canvas export is reliable and cannot be blocked by cross-origin image restrictions. The texture appearance was tuned to the supplied stainless-steel and diamond-plate references.
